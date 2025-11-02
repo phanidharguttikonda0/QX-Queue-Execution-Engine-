@@ -86,7 +86,6 @@ async fn lambda_execution(message: String) -> Result<String, String> {
 }
 
 /*
-
 * we are going to give choice to the user on choosing how much wait time to be mentioned when the queue is empty
 * and also number of retries for each message fail
 */
