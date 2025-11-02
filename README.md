@@ -1,1 +1,2 @@
 # Custom SQS Server
+### this is a basic Template API, where instead of using services like SQS or RabbitMQ , they can use this template such that it works in the same was as the SQS or RabbitMQ with customization.
