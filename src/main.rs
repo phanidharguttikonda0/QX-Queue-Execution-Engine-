@@ -40,7 +40,7 @@ async fn main() {
     tracing::info!("Running the processor such that it runs the logic for execution of the queue") ;
     queue_data_execution(Arc::from(state)).await;
     // after execution, we are going to remove that message from the queue such that, we are going to remove it from the disk as well
-    let tcp_connetion = tokio::net::TcpListener::bind(format!("0.0.0.0:{}",port)).await.unwrap();
+    let tcp_connetion = tokio::net::TcpListener::bind(format!("[::]:{}", port)).await.unwrap();
     tracing::info!("finally establishing the connection") ;
     axum::serve(tcp_connetion, app).await.unwrap()
 }
