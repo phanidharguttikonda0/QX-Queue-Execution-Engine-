@@ -7,6 +7,7 @@ use std::collections::{HashMap, VecDeque};
 use std::sync::{Arc, Mutex};
 use tokio::sync::RwLock;
 use axum::Router;
+use crate::models::queue::Queue;
 use crate::processor::queue_data_execution;
 use crate::routes::queue::{message_queues_routes, queue_routes};
 
@@ -28,6 +29,8 @@ pub type MessageQueues = Arc<RwLock<HashMap<String, tokio::sync::mpsc::Unbounded
 #[derive(Clone, Debug, Default)]
 pub struct AppState2 {
     pub queues: MessageQueues,
+    pub dead_letter_queue:  Arc<RwLock<VecDeque<models::queue::Message>>>,// when all retries are exhausted, we are going to store the message in the dead letter queue
+    // where it contains name filed (represents the queue name) and value field (represents the message)
 }
 
 fn routes() -> (Router, AppState) {
@@ -44,6 +47,7 @@ fn routes() -> (Router, AppState) {
 fn message_queue_routes() -> (Router, AppState2) {
     let state = AppState2 {
         queues: Arc::new(RwLock::new(HashMap::new())),
+        dead_letter_queue: Arc::new(RwLock::new(VecDeque::new())),
     } ;
     (Router::new().route("/", axum::routing::get(|| async {
         tracing::info!("base route hit") ;

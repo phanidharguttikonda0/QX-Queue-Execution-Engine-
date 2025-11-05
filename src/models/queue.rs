@@ -1,12 +1,18 @@
-use serde::Deserialize;
+use std::collections::VecDeque;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Message {
-    pub name: String,
-    pub value: String // the value to be passed after parsing into string
+    pub queue_name: String,
+    pub message: String // the value to be passed after parsing into string
 }
 
 #[derive(Debug, Deserialize)]
 pub struct Queue {
     pub name: String,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct DeadLetterQueue {
+    pub dead_letter_queue: VecDeque<Message>,
 }
