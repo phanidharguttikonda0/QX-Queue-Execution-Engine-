@@ -80,6 +80,7 @@ pub async fn queue_data_execution(state: Arc<AppState>) {
 
 
 async fn lambda_execution(message: String) -> Result<String, String> {
+    tracing::info!("Lambda executed for message: {}", message);
     Ok(String::from("Hello, World!"))
     // here the logic for the lambda can be written by the people whom are using this,
     // based on the message type they can execute which lambda need to be called or which api need to called

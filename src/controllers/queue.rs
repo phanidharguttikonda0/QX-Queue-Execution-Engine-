@@ -1,16 +1,17 @@
 use std::collections::VecDeque;
+use std::thread::sleep;
 use axum::extract::State;
 use axum::Form;
 use axum::response::IntoResponse;
 use crate::{AppState, AppState2};
-use crate::models::queue::Message;
+use crate::models::queue::{Message, Queue};
 
-pub async fn create_queue(State(state): State<AppState>,Form(queue_name): Form<String>) -> impl IntoResponse {
-    tracing::info!("creating queue with name as {}", queue_name) ;
-    if state.queues.read().await.contains_key(&queue_name) {
+pub async fn create_queue(State(state): State<AppState>,Form(queue_name): Form<Queue>) -> impl IntoResponse {
+    tracing::info!("creating queue with name as {}", queue_name.name) ;
+    if state.queues.read().await.contains_key(&queue_name.name) {
         "Queue already exists"
     }else {
-        state.queues.write().await.insert(queue_name, VecDeque::new());
+        state.queues.write().await.insert(queue_name.name, VecDeque::new());
         // over here we are going to store the new data to the disk as well, when server goes down we are going to recover the data from the disk
         "Successfully created queue"
     }
@@ -28,12 +29,12 @@ pub async fn add_message(State(state): State<AppState>,Form(message): Form<Messa
     }
 }
 
-// bottom 2 were message passing queues
+// bottom 2 were message-passing queues concept
 
-pub async fn create_message_queue(State(state): State<AppState2>, Form(queue_name): Form<String>) {
+pub async fn create_message_queue(State(state): State<AppState2>, Form(queue_name): Form<Queue>) {
     let (tx, mut rx) = tokio::sync::mpsc::unbounded_channel::<crate::Message>();
     {
-        state.queues.write().await.insert(queue_name, tx.clone());
+        state.queues.write().await.insert(queue_name.name, tx.clone());
     } // here the lock gets dropped
     tokio::spawn(
         async move {
@@ -47,6 +48,7 @@ pub async fn create_message_queue(State(state): State<AppState2>, Form(queue_nam
                         retries: message.retries + 1,
                     }).unwrap() ; // here we are adding the same message back to the queue, such that it executes again
                 }
+                // tokio::time::sleep(std::time::Duration::from_secs(5)).await;
             }
         }
     );

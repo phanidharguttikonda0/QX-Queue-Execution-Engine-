@@ -54,13 +54,15 @@ fn message_queue_routes() -> (Router, AppState2) {
 #[tokio::main]
 async fn main() {
     tracing_subscriber::fmt::init() ;
+    dotenv::dotenv().ok();
     tracing::info!("Initialized tracing getting started with the subscriber") ;
     let port = std::env::var("PORT").unwrap_or("8080".to_string());
-    let is_message_queues = std::env::var("MESSAGE_QUEUES").unwrap_or("false".to_string());
+    let is_message_queues = std::env::var("MESSAGE_PASSING").unwrap_or("false".to_string());
+    tracing::info!("is_message_queues {}", is_message_queues) ;
     tracing::info!("running on the port {}", port) ;
     // over here we are going to read from the disk, whether there is any unfinished task in the disk
     tracing::info!("Running the processor such that it runs the logic for execution of the queue") ;
-    // after execution, we are going to remove that message from the queue such that, we are going to remove it from the disk as well
+    // after execution, we are going to remove that message from the queue such that we are going to remove it from the disk as well
     let tcp_connection = tokio::net::TcpListener::bind(format!("[::]:{}", port)).await.unwrap();
     tracing::info!("finally establishing the connection") ;
 
